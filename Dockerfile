@@ -37,7 +37,7 @@ RUN npm install . --only-prod && \
     adduser -S -D -h /home/node/app transformer thinx && \
     chown -R transformer:thinx /home/node/app
 
-RUN apk rm gcc g++ make python3 curl git jq
+RUN apk del gcc g++ make python3 curl git jq
 
 # Switch to 'transformer' or 'node' user
 USER transformer
