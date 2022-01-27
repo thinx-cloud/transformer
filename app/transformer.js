@@ -1,20 +1,19 @@
-if (typeof(process.env.SQREEN_TOKEN) !== "undefined") {
+if (typeof (process.env.SQREEN_TOKEN) !== "undefined") {
   require('sqreen');
 }
 
-/*
-var Rollbar = require("rollbar");
-
-var rbconfig = require("./rollbar.json");
-var rollbar = new Rollbar({
-  accessToken: rbconfig.token,
-  handleUncaughtExceptions: true,
-  handleUnhandledRejections: true
-});
-*/
+var rbconfig = process.env.ROLLBAR_ACCESS_TOKEN || null;
+if (rbconfig) {
+  const Rollbar = require("rollbar");
+  const r = new Rollbar({
+    accessToken: rbconfig,
+    environment: process.env.ROLLBAR_ENVIRONMENT || null,
+    handleUncaughtExceptions: true,
+    handleUnhandledRejections: true
+  });
+}
 
 var express = require("express");
-var session = require("express-session");
 var http = require('http');
 var https = require("https");
 
@@ -41,7 +40,7 @@ class Transformer {
       for (let i = 0; i < forks; i++) {
         cluster.fork();
       }
-      cluster.on('exit', (worker, code, signal) => {
+      cluster.on('exit', (worker /*, code, signal */) => {
         console.log(`[transformer] worker ${worker.process.pid} died`);
       });
     } else {
@@ -76,30 +75,31 @@ class Transformer {
 
   setupRoutes() {
 
-    this.app.all("/*", function(req, res, next) {
-        res.header("Access-Control-Allow-Credentials", "true");
-        res.header("Access-Control-Allow-Origin", "*"); // well this could be ventually filtered, let's see how
-        res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
-        if (req.method == "OPTIONS") {
-          res.status(200).end();
-        } else {
-          next();
-        }
-      });
+    this.app.all("/*", function (req, res, next) {
+      res.header("Access-Control-Allow-Credentials", "true");
+      res.header("Access-Control-Allow-Origin", "*"); // well this could be ventually filtered, let's see how
+      res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+      res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
+      if (req.method == "OPTIONS") {
+        res.status(200).end();
+      } else {
+        console.log("TODO: match referrer/origin using ACL", { req });
+        next();
+      }
+    });
 
-    this.app.post("/do", function(req, res) {
+    this.app.post("/do", function (req, res) {
       this.process(req, res);
     });
   }
 
   process(req, res) {
 
-    if (typeof(req.origin) === "undefined") {
+    if (typeof (req.origin) === "undefined") {
       console.log("Request origin", req.origin, "(TODO: filter transformer origin only to the app instance, will that be possible?)");
     }
 
-    if (typeof(req.body) === "undefined") {
+    if (typeof (req.body) === "undefined") {
       res.end(JSON.stringify({
         success: false,
         error: "missing: body"
@@ -115,7 +115,7 @@ class Transformer {
     }
 
     var jobs = ingress.jobs;
-    if (typeof(ingress.jobs) === "undefined") {
+    if (typeof (ingress.jobs) === "undefined") {
       res.end(JSON.stringify({
         success: false,
         error: "missing: body.jobs"
@@ -132,7 +132,6 @@ class Transformer {
     var cleancode;
 
     try {
-      var exec = null;
       var decoded = false;
 
       // Try unwrapping as Base64
@@ -183,9 +182,9 @@ class Transformer {
         return;
       }
       // <- extract to here
-       // console.log(new Date().toString() + " job: " + JSON.stringify(job));
+      // console.log(new Date().toString() + " job: " + JSON.stringify(job));
       try {
-        var transformer = function() {
+        var transformer = function () {
           // initially empty
         };
         /* jshint -W061 */
@@ -212,4 +211,4 @@ class Transformer {
 
 }
 
-new Transformer();
+const t = new Transformer();
