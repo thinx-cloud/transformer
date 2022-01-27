@@ -5,6 +5,7 @@ if (typeof (process.env.SQREEN_TOKEN) !== "undefined") {
 var rbconfig = process.env.ROLLBAR_ACCESS_TOKEN || null;
 if (rbconfig) {
   const Rollbar = require("rollbar");
+  // eslint-disable-next-line no-unused-vars
   const r = new Rollbar({
     accessToken: rbconfig,
     environment: process.env.ROLLBAR_ENVIRONMENT || null,
@@ -211,4 +212,5 @@ class Transformer {
 
 }
 
+// eslint-disable-next-line no-unused-vars
 const t = new Transformer();
