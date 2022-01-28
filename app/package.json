@@ -17,7 +17,7 @@
 		"url": "git+ssh://git@github.com/suculent/thinx-node-transformer.git"
 	},
 	"scripts": {
-		"test": "bash ./test.sh",
+		"test": "jest --detectOpenHandles",
 		"start": "node transformer.js",
 		"coverage": "cov8 node transformer.js &",
 		"preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
@@ -32,11 +32,15 @@
 		"sqreen": "^1.64.2",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
-		"uuid": "^8.3.1"
+		"uuid": "^8.3.1",
+		"vm2": "^3.9.5"
 	},
 	"resolutions": {
 		"ajv": "6.12.3",
 		"flat": "5.0.2",
 		"uuid": "8.3.2"
+	},
+	"devDependencies": {
+		"jest": "^27.4.7"
 	}
 }

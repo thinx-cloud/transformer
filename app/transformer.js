@@ -26,7 +26,23 @@ const base64 = require('base-64');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length; // default number of forks
 
-class Transformer {
+const { NodeVM } = require('vm2');
+
+const vm = new NodeVM({
+    console: 'inherit',
+    sandbox: {},
+    require: {
+        external: true,
+        builtin: ['fs', 'path'],
+        root: "./",
+        mock: {
+            fs: {
+                readFileSync() { return 'Nice try!'; }
+            }
+        }
+    }
+});
+module.exports = class Transformer {
 
   constructor() {
 
@@ -34,11 +50,12 @@ class Transformer {
     this.app.disable('x-powered-by');
 
     if (cluster.isMaster) {
-      console.log(`[transformer] Master ${process.pid} is running`);
+      console.log(`[transformer] Master Transformer ${process.pid} started`);
       // Fork workers.
       const forks = numCPUs;
       for (let i = 0; i < forks; i++) {
-        cluster.fork();
+        if (process.env.ENVIRONMENT != "test")
+          cluster.fork(); // causes open handles potentially keeping Jest from exiting
       }
       cluster.on('exit', (worker /*, code, signal */) => {
         console.log(`[transformer] worker ${worker.process.pid} died`);
@@ -92,6 +109,22 @@ class Transformer {
     });
   }
 
+  execInSandbox(status, device, code_string, callback) {
+    // new async sandbox
+    let sandbox_code = `
+    module.exports = function(status, device, callback) { 
+        ${code_string};
+        callback(transformer(status, device));
+    }
+    `;
+    console.log("Sandbox code:", sandbox_code);
+    let functionWithCallbackInSandbox = vm.run(sandbox_code);
+    functionWithCallbackInSandbox(status, device, (result) => {
+        console.log("transformer result:", { result });
+        callback(result);
+    });
+}
+
   process(req, res) {
 
     if (typeof (req.origin) === "undefined") {
@@ -122,8 +155,18 @@ class Transformer {
       return;
     }
 
+    var device = ingress.device;
+
+    if (typeof (device) === "undefined") {
+      res.end(JSON.stringify({
+        success: false,
+        error: "missing: device"
+      }));
+      return;
+    }
+
     console.log(new Date().toString() + "Incoming job.");
-    this.transform(jobs, res);
+    this.transform(jobs, device, res);
   }
 
   sanitize(code) {
@@ -138,7 +181,6 @@ class Transformer {
         cleancode = unescape(base64.decode(code));
         decoded = true;
       } catch (e) {
-        console.log("[transformer] Job is not a base64.");
         decoded = false;
       }
 
@@ -147,7 +189,6 @@ class Transformer {
           cleancode = unescape(base64.decode(code.toString('utf8')));
           decoded = true;
         } catch (e) {
-          console.log("[transformer] Base 128 not supported anymore.");
           decoded = false;
         }
       }
@@ -157,40 +198,39 @@ class Transformer {
       }
 
     } catch (e) {
-      console.log("[transformer] Docker Transformer Ecception: " + e);
-      error = JSON.stringify(e);
+      console.log("[transformer] Docker Transformer Exception: ", e);
     }
     return cleancode;
   }
 
   process_jobs(jobs, callback) {
+    
     var input_raw = jobs[0].params.status;
     var status = input_raw;
     var error = null;
     for (var job_index in jobs) {
       const job = jobs[job_index];
+      const device = jobs[job_index].params.device;
+      console.log({device});
       // This is just a simple blacklist for dangerous functions.
-      // -> extract from here 
-      const code = this.sanitize(job.code);
-      if (job.code.indexOf("child_process") !== -1) {
+      // -> extract from here as validateJob
+      let code = this.sanitize(job.code);
+      if (code.indexOf("child_process") !== -1) {
         callback("child process not allowed", true);
         return;
       }
-      if (job.code.indexOf("transformer") === -1) {
+      if (code.indexOf("transformer") === -1) {
+        console.log("Invalid code:", job.code);
         callback("lambda function missing", true);
         return;
       }
-      // <- extract to here
-      // console.log(new Date().toString() + " job: " + JSON.stringify(job));
+      // <- extract to here as validateJob
       try {
-        var transformer = function () {
-          // initially empty
-        };
-        /* jshint -W061 */
-        eval(code); // expects `transformer(status, device)` function only
-        /* jshint +W061 */
-        status = transformer(status, job.params.device); // passthrough previous status
-        console.log("[transformer] Docker Transformer will return status: '" + status + "'");
+        console.log("Evaluating code:'", code, "'");
+        this.execInSandbox(status, device, code, (job_status) => {
+          console.log("[transformer] Docker Transformer will return status (currently dropped): '", job_status, "'");
+          status = job_status; // should merge results to an array; this is a problem in async exec where all jobs should be promises
+        });
       } catch (e) {
         console.log("[transformer] Docker Transformer Exception: " + e);
         error = JSON.stringify(e);
@@ -207,8 +247,4 @@ class Transformer {
       }));
     });
   }
-
 }
-
-// eslint-disable-next-line no-unused-vars
-const t = new Transformer();

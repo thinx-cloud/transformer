@@ -45,4 +45,4 @@ USER transformer
 # Open the mapped port
 EXPOSE 7474
 
-CMD [ "node", "transformer.js" ]
+CMD [ "node", "index.js" ]
