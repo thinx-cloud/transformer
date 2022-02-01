@@ -25,10 +25,6 @@ First of all, generate your own Rollbar token, or remove the Rollbar implementat
 
 This instance must be firewalled. Must not be accessible except on localhost, where it is expected to execute primitive JavaScript in sandbox. Expected to run in Docker as a non-root user. Supports outgoing HTTPS.
 
-### Roadmap
-
-* Provide API for Slack, Influx,...
-
 ### Supported Modules (Public)
 
 _Feel free to submit proposals for adding more modules. Intention is to keep it small and safe._

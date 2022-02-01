@@ -1,5 +1,25 @@
 const Transformer = require('./transformer.js');
 
+/* example job:
+{
+  jobs: [
+    {
+        id: "transaction-identifier",
+        owner: "owner-id",
+        codename: "status-transformer-alias",
+        code: base64.encode("function transformer(status, device) { return status; };"),
+        params: {
+          status: "Battery 100.0V",
+          device: {
+            owner: "owner-id",
+            id: "device-id"
+          }
+        }
+    }
+  ]
+}
+*/
+
 const base64 = require('base-64');
 const safe_code = 'let transformer = function(status, device) { console.log("transformer", device); return status; }';
 const safe_code_64 = base64.encode(safe_code);
