@@ -1,3 +1,5 @@
+// file deepcode ignore UseCsurfForExpress: API cannot use CSRF
+
 if (typeof (process.env.SQREEN_TOKEN) !== "undefined") {
   require('sqreen');
 }
@@ -93,7 +95,7 @@ module.exports = class Transformer {
 
     this.app.all("/*", function (req, res, next) {
       res.header("Access-Control-Allow-Credentials", "true");
-      res.header("Access-Control-Allow-Origin", "*"); // well this could be ventually filtered, let's see how
+      res.header("Access-Control-Allow-Origin", "api");
       res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
       res.header("Access-Control-Allow-Headers", "Content-type,Accept,X-Access-Token,X-Key");
       if (req.method == "OPTIONS") {
@@ -243,8 +245,8 @@ module.exports = class Transformer {
     this.process_jobs(jobs, (status, error) => {
       res.end(JSON.stringify({
         output: status,
-        error: error
+        error: error.message
       }));
     });
   }
-}
+};
