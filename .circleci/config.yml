@@ -12,8 +12,10 @@ jobs:
     executor:
       name: node/default
     steps:
-      - checkout
+      - checkout:
+          name: Checkout code
       - node/with-cache:
+          name: Run Tests and Submit Coverage
           steps:
             - run:
                 name: Run Tests
@@ -34,7 +36,6 @@ workflows:
     jobs:
 
       - test:
-          name: Run Tests and Submit Coverage
           context:
             - coveralls
 
@@ -51,4 +52,4 @@ workflows:
           context:
             - dockerhub
           requires:
-            - Test
+            - test
