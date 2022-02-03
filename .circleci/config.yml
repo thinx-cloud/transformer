@@ -45,13 +45,17 @@ workflows:
           revision: <<pipeline.git.revision>>
           context:
             - gitguardian
+        
+      - test:
+          name: Run Tests and Submit Coverage
+          context:
+            - coveralls
 
       - docker/publish:
           name: Build and Publish to Docker Hub
           image: thinxcloud/transformer
           context:
             - dockerhub
-
-      - test:
-          context:
-            - coveralls
+          requires: 
+            - ggshield/scan
+            - test

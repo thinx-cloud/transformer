@@ -3,5 +3,6 @@ node_modules/
 logs
 .env
 app/node_modules
+app/coverage
 local.sh
 
