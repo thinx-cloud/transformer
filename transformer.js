@@ -253,7 +253,7 @@ module.exports = class Transformer {
     this.process_jobs(jobs, (status, error) => {
       res.end(JSON.stringify({
         output: status,
-        error: error.message
+        error: error
       }));
     });
   }
