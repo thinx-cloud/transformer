@@ -25,6 +25,8 @@ jobs:
     steps:
 
       - checkout
+
+      - install-node-example
     
       - node/with-cache:
           steps:
@@ -35,6 +37,9 @@ jobs:
                   cd app
                   npm install
                   npm test
+
+      - node/test:
+          test-results-for: jest
             
       - coveralls/upload:
           parallel: true
@@ -61,11 +66,5 @@ workflows:
             - dockerhub
 
       - test:
-          jobs:
-            - install-node-example
-            - node/test:
-                test-results-for: jest
-            - test
-            
           context:
             - coveralls
