@@ -9,9 +9,12 @@ orbs:
 jobs:
 
   test:
+
+    name: Run Tests and Upload Coverage
     
     executor:
       name: node/default
+      working_directory: app
     
     steps:
 
@@ -23,12 +26,11 @@ jobs:
                 name: Run Tests
                 no_output_timeout: 1m
                 command: |
-                  cd app
                   npm install
                   npm test
             
       - coveralls/upload:
-          path_to_lcov: app/coverage/lcov.info
+          path_to_lcov: ./coverage/lcov.info
           parallel: true
           flag_name: API Tests
           verbose: true
