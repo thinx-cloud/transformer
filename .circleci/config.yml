@@ -51,4 +51,4 @@ workflows:
           context:
             - dockerhub
           requires:
-            - test
+            - Test
