@@ -208,7 +208,7 @@ module.exports = class Transformer {
   process_jobs(jobs, callback) {
     
     var input_raw = jobs[0].params.status;
-    var status = input_raw;
+    var status = input_raw; // should be rather an array
     var error = null;
     for (var job_index in jobs) {
       const job = jobs[job_index];
@@ -230,9 +230,9 @@ module.exports = class Transformer {
       try {
         console.log("Evaluating code:'", code, "'");
         this.execInSandbox(status, device, code, (job_status) => {
-          console.log("[transformer] Docker Transformer will return status (currently dropped): '", job_status, "'");
-          status = job_status; // should merge results to an array; this is a problem in async exec where all jobs should be promises
-        });
+            console.log("[transformer] Docker Transformer will return status (currently dropped): '", job_status, "'");
+            status = job_status; // should merge results to an array; this is a problem in async exec where all jobs should be promises
+          });
       } catch (e) {
         console.log("[transformer] Docker Transformer Exception: " + e);
         error = JSON.stringify(e);

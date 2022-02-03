@@ -13,16 +13,17 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - node/with-cache:
+      - node:
+          # /with-cache
           steps:
             - run: |
                 cd app
                 npm install
                 npm test
       - coveralls/upload:
-          parallel: true
-          flag_name: Test 1
-          verbose: true
+          parallel: false
+          flag_name: Test 2
+          verbose: false
 
 workflows:
 
