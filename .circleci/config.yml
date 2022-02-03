@@ -17,7 +17,7 @@ jobs:
 
       - checkout
     
-      - node/with-cache:
+      - node/run:
           steps:
             - run:
                 name: Run Tests
@@ -26,6 +26,11 @@ jobs:
                   cd app
                   npm install
                   npm test
+                  npm run coverage
+
+      - node/test:
+          path_to_lcov: app/coverage/lcov.info
+          test-results-for: jest
             
       - coveralls/upload:
           parallel: true
