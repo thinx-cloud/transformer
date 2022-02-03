@@ -27,15 +27,6 @@ jobs:
           parallel: true
           verbose: true
   
-  scan:
-    executor:
-      name: gitguardian/ggshield
-    steps:
-      - checkout
-      - ggshield/scan:
-          base_revision: <<pipeline.git.base_revision>>
-          revision: <<pipeline.git.revision>>
-  
   publish:
     executor:
       name: node/default
@@ -56,7 +47,9 @@ workflows:
           context:
             - coveralls
 
-      - scan:
+      - ggshield/scan:
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
           name: Scan using Gitguardian shield
           context:
             - gitguardian
