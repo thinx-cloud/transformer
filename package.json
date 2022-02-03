@@ -18,8 +18,7 @@
 	},
 	"scripts": {
 		"test": "export ENVIRONMENT=test && jest --coverage --detectOpenHandles",
-		"start": "node transformer.js",
-		"preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
+		"start": "node transformer.js"
 	},
 	"dependencies": {
 		"base-64": "^0.1.0",
@@ -34,7 +33,7 @@
 		"uuid": "^8.3.1",
 		"vm2": "^3.9.5"
 	},
-	"resolutions": {
+	"overrides": {
 		"ajv": "6.12.3",
 		"flat": "5.0.2",
 		"uuid": "8.3.2"
