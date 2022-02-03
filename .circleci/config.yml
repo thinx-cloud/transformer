@@ -23,7 +23,7 @@ jobs:
                   npm install
                   npm test
       - coveralls/upload:
-          path_to_lcov: ./app/coverage/lcov.info
+          path_to_lcov: ./coverage/lcov.info
           parallel: true
           verbose: true
 
@@ -33,7 +33,7 @@ workflows:
 
     jobs:
 
-      - Test:
+      - test:
 #          name: Run Tests and Submit Coverage
           context:
             - coveralls
@@ -51,4 +51,4 @@ workflows:
           context:
             - dockerhub
           requires:
-            - Test
+            - test
