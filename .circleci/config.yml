@@ -9,8 +9,8 @@ orbs:
 jobs:
 
   test:
-    executor:
-      name: node/default
+    docker:
+      - image: 'circleci/node:17.4'
     steps:
       - checkout
       - node/with-cache:
@@ -21,9 +21,10 @@ jobs:
                 command: |
                   npm install
                   npm test
+                  ls -la ./coverage
+                  ls -la
             - coveralls/upload:
                 path_to_lcov: ./coverage/lcov.info
-                parallel: true
                 verbose: true
 
 workflows:
