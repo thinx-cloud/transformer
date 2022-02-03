@@ -28,7 +28,7 @@ RUN npm install -g node-gyp
 # Sqreen.io token is inside a JSON file /app/sqreen.json
 RUN mkdir -p /home/node/app
 
-COPY ./app/* /home/node/app/
+COPY . /home/node/app/
 
 WORKDIR /home/node/app
 

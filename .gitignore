@@ -2,7 +2,6 @@ node_modules/
 .scannerwork
 logs
 .env
-app/node_modules
-app/coverage/
+coverage/
 local.sh
 
