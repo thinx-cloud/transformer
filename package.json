@@ -17,8 +17,7 @@
 		"url": "git+ssh://git@github.com/suculent/thinx-node-transformer.git"
 	},
 	"scripts": {
-		"test": "export ENVIRONMENT=test && jest --detectOpenHandles",
-		"coveralls": "export ENVIRONMENT=test && jest --coverage && cat ./coverage/lcov.info | grunt coveralls",
+		"test": "export ENVIRONMENT=test && jest --coverage --detectOpenHandles",
 		"start": "node transformer.js",
 		"preinstall": "if [ -f ./package_lock.json ]; then npx npm-force-resolutions; fi"
 	},
