@@ -4,7 +4,7 @@ orbs:
   docker: circleci/docker@2.0.1
   ggshield: gitguardian/ggshield@1.1.0
   coveralls: coveralls/coveralls@1.0.5
-  node: circleci/node@1.0.1
+  node: circleci/node@1.1.6
 
 jobs:
 
@@ -12,24 +12,20 @@ jobs:
     
     executor:
       name: node/default
-      tag: '17'
     
     steps:
 
-      - checkout    
-
-      - run:
-          name: Run Tests
-          no_output_timeout: 1m
-          command: |
-            cd app
-            npm install
-            npm test
-            npm run coverage
-
-      - node/test:
-          path_to_lcov: app/coverage/lcov.info
-          test-results-for: jest
+      - checkout
+    
+      - node/with-cache:
+          steps:
+            - run:
+                name: Run Tests
+                no_output_timeout: 1m
+                command: |
+                  cd app
+                  npm install
+                  npm test
             
       - coveralls/upload:
           parallel: true
