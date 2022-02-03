@@ -66,10 +66,10 @@ test('process_jobs(jobs, callback)', (done) => {
 test('process(req, res)', (done) => {
   let mock_req = {
     origin: "api",
-    body: {
+    body: JSON.stringify({
       jobs: mock_jobs,
       device: "test-device-udid"
-    }
+    })
   };
   let res = function (result) {
     console.log("end", result);

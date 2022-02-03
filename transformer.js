@@ -168,7 +168,6 @@ module.exports = class Transformer {
     var device = ingress.device;
 
     if (typeof (device) === "undefined") {
-      if (process.ENVIRONMENT )
       res.end(JSON.stringify({
         success: false,
         error: "missing: device"
@@ -177,7 +176,7 @@ module.exports = class Transformer {
     }
 
     console.log(new Date().toString() + "Incoming job.");
-    this.transform(jobs, device, res);
+    this.transform(jobs, res);
   }
 
   sanitize(code) {
@@ -222,7 +221,7 @@ module.exports = class Transformer {
     for (var job_index in jobs) {
       const job = jobs[job_index];
       const device = jobs[job_index].params.device;
-      console.log({device});
+      
       // This is just a simple blacklist for dangerous functions.
       // -> extract from here as validateJob
       let code = this.sanitize(job.code);
