@@ -29,7 +29,7 @@ jobs:
   
   scan:
     executor:
-      name: node/default
+      name: gitguardian/ggshield
     steps:
       - checkout
       - ggshield/scan:
