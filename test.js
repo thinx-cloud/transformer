@@ -63,7 +63,7 @@ test('process_jobs(jobs, callback)', (done) => {
   });
 });
 
-test('process(req, res)', () => {
+test('process(req, res)', (done) => {
   let mock_req = {
     origin: "api",
     body: {
@@ -71,10 +71,11 @@ test('process(req, res)', () => {
       device: "test-device-udid"
     }
   };
-  let res = function() {
-    this.end = function(arg) {
+  let res = {
+    end: (arg) => {
       console.log("end", arg);
-    };
+      done();
+    }
   };
   t.process(mock_req, res, (status) => {
     console.log("test result", status);
