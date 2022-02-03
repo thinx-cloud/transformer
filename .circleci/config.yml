@@ -32,7 +32,6 @@ jobs:
       - coveralls/upload:
           path_to_lcov: ./coverage/lcov.info
           parallel: true
-          flag_name: API Tests
           verbose: true
 
 workflows:

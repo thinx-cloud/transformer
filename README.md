@@ -2,6 +2,8 @@
 
 [![pipeline status](https://gitlab.com/thinx/thinx-node-transformer/badges/master/pipeline.svg)](https://gitlab.com/thinx/thinx-node-transformer/commits/master)
 
+[![Coverage Status](https://coveralls.io/repos/github/thinx-cloud/transformer/badge.svg?branch=main)](https://coveralls.io/github/thinx-cloud/transformer?branch=main)
+
 Instance of NodeJS process [thinx-node-transformer](https://github.com/suculent/thinx-node-tranformer) safely enclosed inside a docker image. Takes jobs as HTTP posts and executes JavaScript code from job locally.
 
 **Before first run**
