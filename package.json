@@ -16,6 +16,9 @@
 		"type": "git",
 		"url": "git+ssh://git@github.com/suculent/thinx-node-transformer.git"
 	},
+	"jest": {
+		"testResultsProcessor": "jest-sonar-reporter"
+	},
 	"scripts": {
 		"test": "export ENVIRONMENT=test && jest --coverage --detectOpenHandles",
 		"start": "node transformer.js"
@@ -44,6 +47,7 @@
 		"grunt-contrib-jshint": "^3.1.1",
 		"grunt-coveralls": "^2.0.0",
 		"jest": "^27.4.7",
-		"jest-junit": "^13.0.0"
+		"jest-junit": "^13.0.0",
+		"jest-sonar-reporter": "^2.0.0"
 	}
 }
