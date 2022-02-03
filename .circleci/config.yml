@@ -28,6 +28,7 @@ jobs:
                   npm test
             
       - coveralls/upload:
+          path_to_lcov: app/coverage/lcov.info
           parallel: true
           flag_name: API Tests
           verbose: true
