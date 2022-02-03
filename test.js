@@ -63,5 +63,24 @@ test('process_jobs(jobs, callback)', (done) => {
   });
 });
 
+test('process(req, res)', () => {
+  let mock_req = {
+    origin: "api",
+    body: {
+      jobs: mock_jobs,
+      device: "test-device-udid"
+    }
+  };
+  let res = function() {
+    this.end = function(arg) {
+      console.log("end", arg);
+    };
+  };
+  t.process(mock_req, res, (status) => {
+    console.log("test result", status);
+    done();
+  });
+});
+
 // transform(jobs, res)
 // only calls process_jobs(jobs, callback) passing res to callback; no need to test

@@ -21,8 +21,6 @@ jobs:
                 command: |
                   npm install
                   npm test
-                  ls -la ./coverage
-                  ls -la
             - coveralls/upload:
                 path_to_lcov: ./coverage/lcov.info
                 verbose: true
@@ -34,8 +32,10 @@ workflows:
     jobs:
 
       - test:
-          context:
+          contexts:
             - coveralls
+            - sqreen
+            - rollbar
 
       - ggshield/scan:
           base_revision: <<pipeline.git.base_revision>>
@@ -47,7 +47,9 @@ workflows:
       - docker/publish:
           name: build and publish
           image: thinxcloud/transformer
-          context:
+          contexts:
             - dockerhub
+            - sqreen
+            - rollbar
           requires:
             - test
