@@ -40,12 +40,12 @@ workflows:
       - ggshield/scan:
           base_revision: <<pipeline.git.base_revision>>
           revision: <<pipeline.git.revision>>
-          name: Scan using Gitguardian shield
+          name: gitguardian
           context:
             - gitguardian
 
       - docker/publish:
-          name: Build and Publish to Docker Hub
+          name: build and publish
           image: thinxcloud/transformer
           context:
             - dockerhub
