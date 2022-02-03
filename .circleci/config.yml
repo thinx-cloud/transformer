@@ -9,14 +9,10 @@ orbs:
 jobs:
 
   test:
-
     executor:
       name: node/default
-    
     steps:
-
       - checkout
-    
       - node/with-cache:
           steps:
             - run:
@@ -26,11 +22,28 @@ jobs:
                   cd app
                   npm install
                   npm test
-            
       - coveralls/upload:
           path_to_lcov: app/coverage/lcov.info
           parallel: true
           verbose: true
+  
+  scan:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - ggshield/scan:
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
+  
+  publish:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - docker/publish:
+          name: Build and Publish to Docker Hub
+          image: thinxcloud/transformer
 
 workflows:
 
@@ -43,17 +56,14 @@ workflows:
           context:
             - coveralls
 
-      - ggshield/scan:
+      - scan:
           name: Scan using Gitguardian shield
-          base_revision: <<pipeline.git.base_revision>>
-          revision: <<pipeline.git.revision>>
           context:
             - gitguardian
 
-      - docker/publish:
+      - publish:
           name: Build and Publish to Docker Hub
-          image: thinxcloud/transformer
           context:
             - dockerhub
-#          requires:
-#            - test
+          requires:
+            - test
