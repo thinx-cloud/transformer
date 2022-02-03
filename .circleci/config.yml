@@ -4,9 +4,18 @@ orbs:
   docker: circleci/docker@2.0.1
   ggshield: gitguardian/ggshield@1.1.0
   coveralls: coveralls/coveralls@1.0.5
-  node: circleci/node@1.1.6
+  node: circleci/node@5.0.0
 
 jobs:
+
+ install-node-example:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: false
+          node-version: '17'
 
   test:
     
@@ -52,5 +61,8 @@ workflows:
             - dockerhub
 
       - test:
+          jobs:
+            - install-node-example
+            - test
           context:
             - coveralls
