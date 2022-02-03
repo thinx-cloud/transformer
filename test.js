@@ -71,30 +71,12 @@ test('process(req, res)', (done) => {
       device: "test-device-udid"
     }
   };
-  let res = {
-    send: function(arg) {
-      console.log("end", arg);
-      done();
-    },
-    end: function(arg) {
-      console.log("end", arg);
-      done();
-      return this;
-    },
-    json: function(err){
-        console.log("\n : " + err);
-    },
-    status: function(responseStatus) {
-        assert.equal(responseStatus, 404);
-        // This next line makes it chainable
-        return this; 
-    }
+  let res = function (result) {
+    console.log("end", result);
+    done();
   };
   t.process(mock_req, res, (status) => {
     console.log("test result", status);
     done();
   });
 });
-
-// transform(jobs, res)
-// only calls process_jobs(jobs, callback) passing res to callback; no need to test

@@ -168,6 +168,7 @@ module.exports = class Transformer {
     var device = ingress.device;
 
     if (typeof (device) === "undefined") {
+      if (process.ENVIRONMENT )
       res.end(JSON.stringify({
         success: false,
         error: "missing: device"
@@ -251,10 +252,17 @@ module.exports = class Transformer {
 
   transform(jobs, res) {
     this.process_jobs(jobs, (status, error) => {
-      res.end(JSON.stringify({
-        output: status,
-        error: error
-      }));
+      if (process.env.ENVIRONMENT != "test") {
+        res.end(JSON.stringify({
+          output: status,
+          error: error
+        }));
+      } else {
+        res({
+          output: status,
+          error: error
+        });
+      }
     });
   }
 };
