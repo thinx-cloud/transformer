@@ -3,6 +3,8 @@ version: 2.1
 orbs: 
   docker: circleci/docker@2.0.1
   ggshield: gitguardian/ggshield@1.1.0
+  coveralls: coveralls/coveralls@1.0.5
+  node: circleci/node@1.1.6
 
 workflows:
   build-and-publish:
@@ -19,3 +21,22 @@ workflows:
           image: thinxcloud/transformer
           context:
             - dockerhub
+
+      - test:
+          executor:
+            name: node/default
+
+            steps:
+              - checkout
+
+              - node/with-cache:
+                  steps:
+                    - run: |
+                        cd app
+                        npm install
+                        npm test
+
+              - coveralls/upload:
+                  parallel: true
+                  flag_name: Test 1
+                  verbose: true
