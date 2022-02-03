@@ -7,16 +7,7 @@ orbs:
   node: circleci/node@5.0.0
 
 jobs:
-
-  install-node-example:
-    docker:
-      - image: 'cimg/base:stable'
-    steps:
-      - checkout
-      - node/install:
-          install-yarn: false
-          node-version: '17'
-
+      
   test:
     
     executor:
@@ -26,7 +17,9 @@ jobs:
 
       - checkout
 
-      - install-node-example
+      - node/install:
+          install-yarn: false
+          node-version: '17'  
     
       - node/with-cache:
           steps:
