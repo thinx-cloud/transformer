@@ -26,15 +26,6 @@ jobs:
           path_to_lcov: app/coverage/lcov.info
           parallel: true
           verbose: true
-  
-  publish:
-    executor:
-      name: node/default
-    steps:
-      - checkout
-      - docker/publish:
-          name: Build and Publish to Docker Hub
-          image: thinxcloud/transformer
 
 workflows:
 
@@ -54,8 +45,9 @@ workflows:
           context:
             - gitguardian
 
-      - publish:
+      - docker/publish:
           name: Build and Publish to Docker Hub
+          image: thinxcloud/transformer
           context:
             - dockerhub
           requires:
