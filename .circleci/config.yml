@@ -11,25 +11,20 @@ jobs:
   test:
     
     executor:
-      name: node/default
+      name: node/node:default
+      tag: '17'
     
     steps:
 
       - checkout
-
-      - node/install:
-          install-yarn: false
-          node-version: '17'  
-    
-      - node/with-cache:
-          steps:
-            - run:
-                name: Run Tests
-                no_output_timeout: 1m
-                command: |
-                  cd app
-                  npm install
-                  npm test
+  
+      - run:
+          name: Run Tests
+          no_output_timeout: 1m
+          command: |
+            cd app
+            npm install
+            npm test
 
       - node/test:
           test-results-for: jest
