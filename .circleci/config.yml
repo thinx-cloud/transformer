@@ -34,7 +34,6 @@ workflows:
       - test:
           context:
             - coveralls
-            - sqreen
             - rollbar
 
       - ggshield/scan:
