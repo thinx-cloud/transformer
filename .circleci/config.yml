@@ -12,10 +12,8 @@ jobs:
     executor:
       name: node/default
     steps:
-      - checkout:
-          name: Checkout code
+      - checkout
       - node/with-cache:
-          name: Run Tests and Submit Coverage
           steps:
             - run:
                 name: Run Tests
