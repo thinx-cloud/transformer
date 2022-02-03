@@ -72,9 +72,22 @@ test('process(req, res)', (done) => {
     }
   };
   let res = {
-    end: (arg) => {
+    send: function(arg) {
       console.log("end", arg);
       done();
+    },
+    end: function(arg) {
+      console.log("end", arg);
+      done();
+      return this;
+    },
+    json: function(err){
+        console.log("\n : " + err);
+    },
+    status: function(responseStatus) {
+        assert.equal(responseStatus, 404);
+        // This next line makes it chainable
+        return this; 
     }
   };
   t.process(mock_req, res, (status) => {
