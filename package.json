@@ -33,13 +33,12 @@
 		"sqreen": "^1.64.2",
 		"ssl-root-cas": "^1.2.5",
 		"typeof": "^1.0.0",
-		"uuid": "8.3.2",
+		"uuid": "^8.3.2",
 		"vm2": "^3.9.7"
 	},
 	"overrides": {
 		"ajv": "6.12.3",
-		"flat": "5.0.2",
-		"uuid": "8.3.2"
+		"flat": "5.0.2"
 	},
 	"devDependencies": {
 		"coveralls": "^3.1.1",
