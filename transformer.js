@@ -12,7 +12,8 @@ if (rbconfig) {
     accessToken: rbconfig,
     environment: process.env.ROLLBAR_ENVIRONMENT || null,
     handleUncaughtExceptions: true,
-    handleUnhandledRejections: true
+    handleUnhandledRejections: true,
+    revision: process.env.REVISION || "transformer"
   });
 }
 
