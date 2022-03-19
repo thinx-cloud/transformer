@@ -5,10 +5,11 @@ if (typeof (process.env.SQREEN_TOKEN) !== "undefined") {
 }
 
 var rbconfig = process.env.ROLLBAR_ACCESS_TOKEN || null;
+let rollbar;
 if (rbconfig) {
   const Rollbar = require("rollbar");
   // eslint-disable-next-line no-unused-vars
-  const r = new Rollbar({
+  rollbar = new Rollbar({
     accessToken: rbconfig,
     environment: process.env.ROLLBAR_ENVIRONMENT || null,
     handleUncaughtExceptions: true,
