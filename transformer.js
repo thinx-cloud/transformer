@@ -17,6 +17,9 @@ if (rbconfig) {
 }
 
 var express = require('express');
+const helmet = require('helmet');
+express.use(helmet.frameguard());
+
 var http = require('http');
 var https = require('https');
 
@@ -50,6 +53,7 @@ module.exports = class Transformer {
 
     this.app = express();
     this.app.disable('x-powered-by');
+    this.app.use(helmet.frameguard());
 
     if (cluster.isMaster) {
       console.log(`[transformer] Master Transformer ${process.pid} started`);

@@ -28,6 +28,7 @@
 		"body-parser": "^1.18.2",
 		"express": "^4.16.3",
 		"express-session": "^1.17.1",
+		"helmet": "^5.0.2",
 		"rollbar": "^2.24.0",
 		"snyk": "^1.424.1",
 		"sqreen": "^1.64.2",
