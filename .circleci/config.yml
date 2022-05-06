@@ -1,16 +1,17 @@
 version: 2.1
 
 orbs: 
-  docker: circleci/docker@2.0.1
+  docker: circleci/docker@2.0.3
   ggshield: gitguardian/ggshield@1.1.0
   coveralls: coveralls/coveralls@1.0.5
   node: circleci/node@1.1.6
+  sonarcloud: sonarsource/sonarcloud@1.0.3
 
 jobs:
 
   test:
-    executor:
-      name: node/default
+    docker:
+      - image: thinxcloud/console-build-env:latest
     steps:
       - checkout
       - node/with-cache:
@@ -24,6 +25,7 @@ jobs:
             - coveralls/upload:
                 path_to_lcov: ./coverage/lcov.info
                 verbose: true
+      - sonarcloud/scan
 
 workflows:
 
@@ -35,6 +37,7 @@ workflows:
           context:
             - coveralls
             - rollbar
+            - sonarcloud
 
       - ggshield/scan:
           base_revision: << pipeline.git.base_revision >>
