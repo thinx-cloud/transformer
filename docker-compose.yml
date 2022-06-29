@@ -13,8 +13,6 @@ services:
       args:
         - ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
         - ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
-        - SQREEN_APP_NAME=${SQREEN_APP_NAME}
-        - SQREEN_TOKEN=${SQREEN_APP_NAME}
         - REVISION=1
     networks:
       - internal

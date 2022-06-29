@@ -8,8 +8,7 @@ Instance of NodeJS process [thinx-node-transformer](https://github.com/suculent/
 
 **Before first run**
 
-1. Register at Sqreen.io and add your details as environment variables `SQREEN_APP_NAME` and `SQREEN_TOKEN`
-2. Register at Rollbar.io and your Access Token as `POST_SERVER_ITEM_ACCESS_TOKEN` environment variable named `ROLLBAR_ACCESS_TOKEN` with optional `ROLLBAR_ENVIRONMENT` tag 	
+1. Register at Rollbar.io and your Access Token as `POST_SERVER_ITEM_ACCESS_TOKEN` environment variable named `ROLLBAR_ACCESS_TOKEN` with optional `ROLLBAR_ENVIRONMENT` tag 	
 See example expected code at [THiNX Wiki](https://suculent/thinx-device-api)
 
 ### Exceptionally dumb
@@ -19,8 +18,6 @@ This instance does not support anything more than bare node.js express server wi
 ### Security Note
 
 In production, it's advised to track your Transformer using [Rollbar](https://rollbar.com/) as implemented in example.
-
-If you're running this in open-source production server, you can use free [Sqreen](https://www.sqreen.com) RASP protection to prevent various attacks on your Transformer.
 
 First of all, generate your own Rollbar token, or remove the Rollbar implementation if you don't want to track what's going on inside your Transformer.
 
