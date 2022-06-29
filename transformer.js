@@ -1,9 +1,5 @@
 // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
 
-if (typeof (process.env.SQREEN_TOKEN) !== "undefined") {
-  require('sqreen');
-}
-
 var rbconfig = process.env.ROLLBAR_ACCESS_TOKEN || null;
 let rollbar;
 if (rbconfig) {

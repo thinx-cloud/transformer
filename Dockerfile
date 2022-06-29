@@ -2,14 +2,10 @@ FROM node:17-alpine
 
 LABEL name="thinxcloud/transformer" version="1.8.76"
 
-ARG SQREEN_APP_NAME
-ARG SQREEN_TOKEN
 ARG ROLLBAR_ACCESS_TOKEN
 ARG ROLLBAR_ENVIRONMENT
 ARG REVISION
 
-ENV SQREEN_APP_NAME=${SQREEN_APP_NAME}
-ENV SQREEN_TOKEN=${SQREEN_TOKEN}
 ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 ENV REVISION=${REVISION}
@@ -25,7 +21,6 @@ RUN npm config set unsafe-perm true
 # allow building native extensions with alpine: https://github.com/nodejs/docker-node/issues/384
 RUN npm install -g node-gyp
 
-# Sqreen.io token is inside a JSON file /app/sqreen.json
 RUN mkdir -p /home/node/app
 
 COPY . /home/node/app/
