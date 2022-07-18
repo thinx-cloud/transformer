@@ -16,8 +16,6 @@ if (rbconfig) {
 
 var express = require('express');
 const helmet = require('helmet');
-express.use(helmet.frameguard());
-
 var http = require('http');
 var https = require('https');
 
