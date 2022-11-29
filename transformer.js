@@ -77,6 +77,7 @@ module.exports = class Transformer {
     // Workers can share any TCP connection
     // In this case it is an HTTP server
     if (process.env.ENVIRONMENT != "test")
+      // deepcode ignore HttpToHttps: <please specify a reason of ignoring this>
       http.createServer(this.app).listen(8000, "0.0.0.0"); // WTF? We have worker on port 8000? What is it doing here?
 
     this.app.use(parser.json({
