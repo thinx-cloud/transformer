@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:21-alpine3.18
 
 LABEL name="thinxcloud/transformer" version="1.8.76"
 
