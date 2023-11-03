@@ -27,22 +27,15 @@ const base64 = require('base-64');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length; // default number of forks
 
-const { NodeVM } = require('vm2');
+// Create a new isolate limited to 128MB
+const ivm = require('isolated-vm');
+const isolate = new ivm.Isolate({ memoryLimit: 128 });
 
-const vm = new NodeVM({
-    console: 'inherit',
-    sandbox: {},
-    require: {
-        external: true,
-        builtin: ['fs', 'path'],
-        root: "./",
-        mock: {
-            fs: {
-                readFileSync() { return 'Nice try!'; }
-            }
-        }
-    }
-});
+// Create a new context within this isolate. Each context has its own copy of all the builtin
+// Objects. So for instance if one context does Object.prototype.foo = 1 this would not affect any
+// other contexts.
+const context = isolate.createContextSync();
+
 module.exports = class Transformer {
 
   constructor() {
@@ -130,7 +123,7 @@ module.exports = class Transformer {
     }
     `;
     console.log("Sandbox code:", sandbox_code);
-    let functionWithCallbackInSandbox = vm.run(sandbox_code);
+    let functionWithCallbackInSandbox = context.evalSync(sandbox_code);
     functionWithCallbackInSandbox(status, device, (result) => {
         console.log("transformer result:", { result });
         callback(result);
