@@ -29,12 +29,7 @@ const numCPUs = require('os').cpus().length; // default number of forks
 
 // Create a new isolate limited to 128MB
 const ivm = require('isolated-vm');
-const isolate = new ivm.Isolate({ memoryLimit: 128 });
-
-// Create a new context within this isolate. Each context has its own copy of all the builtin
-// Objects. So for instance if one context does Object.prototype.foo = 1 this would not affect any
-// other contexts.
-const context = isolate.createContextSync();
+const isolate = new ivm.Isolate({ memoryLimit: 64 });
 
 module.exports = class Transformer {
 
@@ -90,7 +85,7 @@ module.exports = class Transformer {
 
     if (process.env.ENVIRONMENT != "test")
       http.createServer(this.app).listen(http_port, "0.0.0.0");
-    
+
     console.log(`[transformer] node ${process.pid} started on port: ${http_port}`);
   }
 
@@ -115,20 +110,32 @@ module.exports = class Transformer {
   }
 
   execInSandbox(status, device, code_string, callback) {
-    // new async sandbox
-    let sandbox_code = `
-    module.exports = function(status, device, callback) { 
-        ${code_string};
-        callback(transformer(status, device));
-    }
-    `;
-    console.log("Sandbox code:", sandbox_code);
-    let functionWithCallbackInSandbox = context.evalSync(sandbox_code);
-    functionWithCallbackInSandbox(status, device, (result) => {
-        console.log("transformer result:", { result });
-        callback(result);
+
+    const context = isolate.createContextSync();
+    const jail = context.global;
+    jail.setSync('global', jail.derefInto());
+
+    // We will create a basic `log` function for the new isolate to use.
+    jail.setSync('log', (...args) => {
+      console.log(...args);
     });
-}
+
+    // Additional 'rtn' function for returning processed results from the jail upstream
+    jail.setSync('rtn', (...args) => {
+      console.log("Returned args:", ...args);
+      callback(...args);
+    });
+
+    // Run the untrusted code inside isolate instead of performing unsafe `eval`
+    const dev = JSON.stringify(device);
+    const untrusted = isolate.compileScriptSync(`
+          ${code_string}; // MUST include a lambda function named 'transformer'
+          rtn(transformer("${status}", ${dev})); // runs the code and returns value through rtn and callback
+        `);
+
+    untrusted.runSync(context);
+
+  }
 
   process(req, res) {
 
@@ -203,20 +210,20 @@ module.exports = class Transformer {
       }
 
     } catch (e) {
-      console.log("[transformer] Docker Transformer Exception: ", e);
+      console.log("[transformer] Docker Transformer Exception 1A: ", e);
     }
     return cleancode;
   }
 
   process_jobs(jobs, callback) {
-    
+
     var input_raw = jobs[0].params.status;
     var status = input_raw; // should be rather an array
     var error = null;
     for (var job_index in jobs) {
       const job = jobs[job_index];
       const device = jobs[job_index].params.device;
-      
+
       // This is just a simple blacklist for dangerous functions.
       // -> extract from here as validateJob
       let code = this.sanitize(job.code);
@@ -233,11 +240,11 @@ module.exports = class Transformer {
       try {
         console.log("Evaluating code:'", code, "'");
         this.execInSandbox(status, device, code, (job_status) => {
-            console.log("[transformer] Docker Transformer will return status (currently dropped): '", job_status, "'");
-            status = job_status; // should merge results to an array; this is a problem in async exec where all jobs should be promises
-          });
+          console.log("[transformer] Docker Transformer will return status (currently dropped): '", job_status, "'");
+          status = job_status; // should merge results to an array; this is a problem in async exec where all jobs should be promises
+        });
       } catch (e) {
-        console.log("[transformer] Docker Transformer Exception: " + e);
+        console.log("[transformer] Docker Transformer Exception 2A: " + e);
         error = JSON.stringify(e);
       }
     }

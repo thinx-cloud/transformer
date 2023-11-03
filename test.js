@@ -21,7 +21,7 @@ const Transformer = require('./transformer.js');
 */
 
 const base64 = require('base-64');
-const safe_code = 'let transformer = function(status, device) { console.log("transformer", device); return status; }';
+const safe_code = 'transformer = function(status, device) { console.log("transformer", device); return status; }';
 const safe_code_64 = base64.encode(safe_code);
 const mock_jobs = [{
   params: {

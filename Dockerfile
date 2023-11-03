@@ -1,6 +1,6 @@
 FROM node:21-alpine3.18
 
-LABEL name="thinxcloud/transformer" version="1.8.76"
+LABEL name="thinxcloud/transformer" version="2.0.125"
 
 ARG ROLLBAR_ACCESS_TOKEN
 ARG ROLLBAR_ENVIRONMENT
@@ -38,4 +38,4 @@ USER transformer
 # Open the mapped port
 EXPOSE 7474
 
-CMD [ "node", "index.js" ]
+CMD [ "node", "--no-node-snapshot", "index.js" ]
