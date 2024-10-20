@@ -5,7 +5,6 @@ orbs:
   ggshield: gitguardian/ggshield@1.1.4
   coveralls: coveralls/coveralls@1.0.6
   node: circleci/node@6.3.0
-#  sonarcloud: sonarsource/sonarcloud@1.0.3
 
 jobs:
 
@@ -14,18 +13,15 @@ jobs:
       - image: thinxcloud/console-build-env:latest
     steps:
       - checkout
-      - node:
-          steps:
-            - run:
-                name: Run Tests
-                no_output_timeout: 1m
-                command: |
-                  npm install
-                  npm test
-            - coveralls/upload:
-                path_to_lcov: ./coverage/lcov.info
-                verbose: true
-#      - sonarcloud/scan
+      - run:
+        name: Run Tests
+        no_output_timeout: 1m
+        command: |
+          npm install
+          npm test
+      - coveralls/upload:
+          path_to_lcov: ./coverage/lcov.info
+          verbose: true
 
 workflows:
 
