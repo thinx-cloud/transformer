@@ -14,7 +14,7 @@ jobs:
       - image: thinxcloud/console-build-env:latest
     steps:
       - checkout
-      - node/with-cache:
+      - node:
           steps:
             - run:
                 name: Run Tests
