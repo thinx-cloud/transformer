@@ -1,4 +1,5 @@
-FROM node:21-alpine3.18
+# Isolated-VM is not compatible with node 23/24
+FROM node:22-alpine3.20
 
 LABEL name="thinxcloud/transformer" version="2.0.125"
 
@@ -24,7 +25,7 @@ COPY . /home/node/app/
 
 WORKDIR /home/node/app
 
-RUN npm install -g npm@10.2.3 && \
+RUN npm install -g npm@10.9.2 && \
     npm install . --only-prod && \
     addgroup -S thinx && \
     adduser -S -D -h /home/node/app transformer thinx && \
