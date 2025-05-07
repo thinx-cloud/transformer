@@ -1,3 +1,6 @@
+// Mock isolated-vm before requiring transformer.js
+jest.mock('isolated-vm');
+
 const Transformer = require('./transformer.js');
 
 /* example job:

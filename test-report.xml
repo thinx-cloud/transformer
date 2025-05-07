@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testExecutions version="1">
-  <file path="/Users/sychram/Repositories/thinx-device-api/services/transformer/test.js">
-    <testCase name="sanitize(code): decode base64-wrapped code" duration="3"/>
+  <file path="/Users/sychram/Repositories/thinx-api/thinx-device-api/services/transformer/test.js">
+    <testCase name="sanitize(code): decode base64-wrapped code" duration="4"/>
     <testCase name="sanitize(code): decode bare code" duration="1"/>
-    <testCase name="process_jobs(jobs, callback)" duration="19"/>
-    <testCase name="process(req, res)" duration="17"/>
+    <testCase name="process_jobs(jobs, callback)" duration="5"/>
+    <testCase name="process(req, res)" duration="7"/>
   </file>
 </testExecutions>
