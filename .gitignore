@@ -5,3 +5,4 @@ logs
 coverage/
 local.sh
 .dccache
+settings.json
