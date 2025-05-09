@@ -26,7 +26,7 @@ COPY . /home/node/app/
 WORKDIR /home/node/app
 
 RUN npm install -g npm@10.9.2 && \
-    npm install . --only-prod && \
+    npm install . --omit=dev && \
     addgroup -S thinx && \
     adduser -S -D -h /home/node/app transformer thinx && \
     chown -R transformer:thinx /home/node/app
