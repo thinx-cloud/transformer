@@ -1,5 +1,5 @@
 # Isolated-VM is not compatible with node 23/24
-FROM node:22-alpine3.20
+FROM node:25-alpine3.21
 
 LABEL name="thinxcloud/transformer" version="2.0.125"
 
