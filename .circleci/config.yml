@@ -13,6 +13,12 @@ jobs:
       - image: thinxcloud/console-build-env:latest
     steps:
       - checkout
+      - node/install:
+          node-version: '25.0'
+      - run:
+          name: Ensure build deps (for isolated-vm)
+          command: |
+            apt-get update && apt-get install -y python3 make g++
       - node/with-cache:
           steps:
             - run:
@@ -24,7 +30,6 @@ jobs:
             - coveralls/upload:
                 path_to_lcov: ./coverage/lcov.info
                 verbose: true
-#      - sonarcloud/scan
 
 workflows:
 
@@ -36,7 +41,6 @@ workflows:
           context:
             - coveralls
             - rollbar
-#            - sonarcloud
 
       - ggshield/scan:
           base_revision: << pipeline.git.base_revision >>
