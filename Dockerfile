@@ -1,7 +1,7 @@
 # Isolated-VM is not compatible with node 23/24
 FROM node:25-alpine3.21
 
-LABEL name="thinxcloud/transformer" version="2.0.125"
+LABEL name="thinxcloud/transformer" version="2.0.147"
 
 ARG ROLLBAR_ACCESS_TOKEN
 ARG ROLLBAR_ENVIRONMENT
