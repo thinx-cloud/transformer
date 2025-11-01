@@ -13,23 +13,33 @@ jobs:
       - image: thinxcloud/console-build-env:latest
     steps:
       - checkout
+
+      # Install Node 25
       - node/install:
           node-version: '25.0'
+
+      # Build deps for native modules (e.g., isolated-vm)
       - run:
           name: Ensure build deps (for isolated-vm)
           command: |
             apt-get update && apt-get install -y python3 make g++
-      - node/with-cache:
-          steps:
-            - run:
-                name: Run Tests
-                no_output_timeout: 1m
-                command: |
-                  npm install
-                  npm test
-            - coveralls/upload:
-                path_to_lcov: ./coverage/lcov.info
-                verbose: true
+
+      # Install deps with caching (replacement for node/with-cache)
+      - node/install-packages:
+          pkg-manager: npm
+          app-dir: .
+          override-ci-command: npm ci
+
+      # Run tests
+      - run:
+          name: Run Tests
+          no_output_timeout: 1m
+          command: npm test
+
+      # Upload coverage to Coveralls
+      - coveralls/upload:
+          path_to_lcov: ./coverage/lcov.info
+          verbose: true
 
 workflows:
 
