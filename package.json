@@ -25,10 +25,10 @@
 	},
 	"dependencies": {
 		"base-64": "^0.1.0",
-		"body-parser": "^1.18.2",
-		"express": "^4.18.2",
+		"body-parser": "^2.2.1",
+		"express": "^5.1.0",
 		"express-session": "^1.17.1",
-		"helmet": "^5.1.0",
+		"helmet": "^8.1.0",
 		"isolated-vm": "^4.6.0",
 		"rollbar": "^2.25.2",
 		"snyk": "^1.1107.0",
