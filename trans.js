@@ -218,7 +218,7 @@ class Transformer {
         error: error
       });
     });
-  };
+  }
 }
 
 // Init phase off-class

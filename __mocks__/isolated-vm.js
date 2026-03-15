@@ -7,7 +7,7 @@ class MockIsolate {
   createContextSync() {
     return {
       global: {
-        setSync: (name, value) => {
+        setSync: (_name, _value) => {
           // Mock setSync
         },
         derefInto: () => {

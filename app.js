@@ -29,6 +29,6 @@ if (undef(srv)) {
 } 
 
 console.log(`${new Date().getTime()} [info] » Starting transformer against ${srv}`);
-const transformer = new Transformer(srv);
+new Transformer(srv);
 
 if (exists(r)) r.info("Transformer started", { context: "circle", environment: process.env.ENVIRONMENT, server: srv });
