@@ -38,7 +38,8 @@
 	},
 	"overrides": {
 		"ajv": "6.12.3",
-		"flat": "5.0.2"
+		"flat": "5.0.2",
+		"path-to-regexp": "8.4.0"
 	},
 	"devDependencies": {
 		"coveralls": "^3.1.1",
