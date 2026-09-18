@@ -1,6 +1,6 @@
-FROM node:22-trixie-slim AS build
+FROM node:22.23.2-trixie-slim AS build
 
-LABEL name="thinxcloud/transformer" version="2.0.147"
+LABEL name="thinxcloud/transformer" version="2.1.159"
 
 WORKDIR /home/node/app
 
@@ -19,9 +19,11 @@ RUN groupadd --gid 10001 thinx && \
     useradd --uid 10001 --gid thinx --home-dir /home/node/app --shell /usr/sbin/nologin --no-create-home transformer && \
     chown -R transformer:thinx /home/node/app
 
-FROM gcr.io/distroless/nodejs22-debian13
+# Pinned by digest to guarantee the patched runtime contents:
+#   nodejs 22.23.2, libc6 2.41-12+deb13u4, libssl3t64 3.5.7-1~deb13u2
+FROM gcr.io/distroless/nodejs22-debian13@sha256:412a5f8fce490bcff01fc2a73ec43bb62071e1b71dd847eeacaae7b8ecef1dc1
 
-LABEL name="thinxcloud/transformer" version="2.0.147"
+LABEL name="thinxcloud/transformer" version="2.1.159"
 
 ARG ROLLBAR_ACCESS_TOKEN
 ARG ROLLBAR_ENVIRONMENT
