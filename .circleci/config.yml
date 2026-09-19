@@ -62,6 +62,11 @@ workflows:
       - docker/publish:
           name: build and publish
           image: thinxcloud/transformer
+          # Without an explicit tag the orb defaults to $CIRCLE_SHA1, so every
+          # build published a SHA-only tag and :latest was last written in
+          # 2022 — while docker-swarm.yml pulls thinxcloud/transformer:latest.
+          # Publish both: :latest for the swarm, the SHA for traceability.
+          tag: 'latest,$CIRCLE_SHA1'
           # Publish only from main. Without this the job runs on every branch,
           # so any feature-branch push overwrites the production :latest tag.
           filters:
