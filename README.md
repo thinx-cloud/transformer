@@ -9,7 +9,8 @@ Instance of NodeJS process [thinx-node-transformer](https://github.com/suculent/
 **Before first run**
 
 1. Register at Rollbar.io and your Access Token as `POST_SERVER_ITEM_ACCESS_TOKEN` environment variable named `ROLLBAR_ACCESS_TOKEN` with optional `ROLLBAR_ENVIRONMENT` tag 	
-See example expected code at [THiNX Wiki](https://suculent/thinx-device-api)
+See [API contract](#api-contract) below for the request/response shape and an
+example lambda.
 
 ### Exceptionally dumb
 
@@ -53,26 +54,99 @@ suculent/thinx-node-transformer
 `docker build -t suculent/thinx-node-transformer .`
 
 
-## Job Request Format
+## API contract
 
-HTTP POST BODY:
+One endpoint. The service is stateless: it compiles and runs the supplied
+lambda, returns the result, and persists nothing.
+
+```
+POST /do
+Content-Type: application/json
+```
+
+### Request
 
 ```json
 {
-  jobs: [
+  "device": { "owner": "owner-id", "id": "device-id" },
+  "jobs": [
     {
-        id: "transaction-identifier",
-        owner: "owner-id",
-        codename: "status-transformer-alias",
-        code: base64.encode("function transformer(status, device) { return status; };"),
-        params: {
-          status: "Battery 100.0V",
-          device: {
-            owner: "owner-id",
-            id: "device-id"
-          }
-        }
+      "id": "transaction-identifier",
+      "owner": "owner-id",
+      "codename": "status-transformer-alias",
+      "code": "ZnVuY3Rpb24gdHJhbnNmb3JtZXIoc3RhdHVzLCBkZXZpY2UpIHsgcmV0dXJuIHN0YXR1czsgfQ==",
+      "params": {
+        "status": "Battery 100.0V",
+        "device": { "owner": "owner-id", "id": "device-id" }
+      }
     }
   ]
 }
 ```
+
+**Both `device` and `jobs` are required at the top level.** A missing one is
+rejected before any code runs:
+
+| missing | response |
+|---|---|
+| `jobs` | `{"success": false, "error": "missing: body.jobs"}` |
+| `device` | `{"success": false, "error": "missing: device"}` |
+
+Note that top-level `device` is only checked for presence. The object actually
+handed to the lambda is `jobs[i].params.device`, so both must be supplied even
+though they usually carry the same value.
+
+### Per-job fields
+
+- **`code`** — base64-encoded JavaScript defining a function named
+  `transformer`. It is decoded, then screened twice before compiling:
+  it must contain the substring `transformer` (otherwise
+  `lambda function missing`) and must not contain `child_process`
+  (otherwise `child process not allowed`).
+- **`params.status`** — the value passed as the lambda's first argument.
+  Only `jobs[0].params.status` seeds the run; each subsequent job receives the
+  previous job's return value, so a multi-job request is a chain, not a
+  parallel batch.
+- **`params.device`** — passed as the second argument, serialised with
+  `JSON.stringify`.
+
+`id`, `owner` and `codename` are carried for traceability and are not
+interpreted by the service.
+
+### The lambda
+
+Invoked inside an `isolated-vm` isolate as:
+
+```js
+rtn(transformer("<params.status>", <params.device as JSON>));
+```
+
+Two globals are injected into the isolate, and nothing else — no `require`,
+no filesystem, no network:
+
+- `log(...)` — writes to the service's stdout
+- `rtn(value)` — returns `value` to the caller (called for you, around the
+  `transformer(...)` result)
+
+Because `status` is interpolated verbatim into a double-quoted string literal
+in the generated script, **it must be a plain scalar containing no `"`,
+backslash or newline**. Callers are responsible for stripping those before
+submitting.
+
+### Response
+
+```json
+{ "output": "<value returned by the last transformer>", "error": "transformer_error" }
+```
+
+> **`error` is not a failure signal.** Outside `ENVIRONMENT=test` the field is
+> currently populated with the literal string `transformer_error` on every
+> response, successful or not. Judge success by `output`, not by the presence
+> of `error`.
+
+### Known limitations
+
+- `runSync` is called without a timeout, so a lambda that never returns blocks
+  its worker. Keep transformers short and terminating.
+- Results are not merged across jobs; only the final job's return value is
+  reported in `output`.
