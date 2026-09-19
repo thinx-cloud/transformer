@@ -13,6 +13,11 @@ class MockIsolate {
         derefInto: () => {
           return {};
         }
+      },
+      // execInSandbox releases the context after every run so contexts do not
+      // accumulate against the isolate's memory limit.
+      release: () => {
+        // Mock release
       }
     };
   }

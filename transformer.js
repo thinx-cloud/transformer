@@ -31,6 +31,12 @@ const numCPUs = require('os').cpus().length; // default number of forks
 const ivm = require('isolated-vm');
 const isolate = new ivm.Isolate({ memoryLimit: 64 });
 
+// Wall-clock budget for a single transformer. Without a limit, `runSync` runs
+// until the lambda returns, so `while(true){}` pins a worker forever and the
+// cluster degrades one fork at a time. Transformers are meant to be primitive,
+// so a second is generous.
+const SANDBOX_TIMEOUT_MS = parseInt(process.env.TRANSFORMER_TIMEOUT_MS, 10) || 1000;
+
 module.exports = class Transformer {
 
   constructor() {
@@ -126,14 +132,29 @@ module.exports = class Transformer {
       callback(...args);
     });
 
+    // Device status and the device object are passed in as isolate globals
+    // rather than interpolated into the script source. Interpolating them
+    // meant a status containing a double quote or backslash closed the string
+    // literal early and the remainder was compiled as code — attacker-shaped
+    // device status could rewrite the transform. Handing them over as values
+    // means nothing from the request is ever parsed as source. Only
+    // `code_string` is, which is the point of the service.
+    jail.setSync('__thinx_status', typeof status === 'string' ? status : String(status));
+    jail.setSync('__thinx_device_json', JSON.stringify(device === undefined ? null : device));
+
     // Run the untrusted code inside isolate instead of performing unsafe `eval`
-    const dev = JSON.stringify(device);
     const untrusted = isolate.compileScriptSync(`
           ${code_string}; // MUST include a lambda function named 'transformer'
-          rtn(transformer("${status}", ${dev})); // runs the code and returns value through rtn and callback
+          rtn(transformer(__thinx_status, JSON.parse(__thinx_device_json))); // runs the code and returns value through rtn and callback
         `);
 
-    untrusted.runSync(context);
+    try {
+      untrusted.runSync(context, { timeout: SANDBOX_TIMEOUT_MS });
+    } finally {
+      // Each call creates a context in the shared isolate; without releasing
+      // it they accumulate against the 64MB limit until allocation fails.
+      context.release();
+    }
 
   }
 

@@ -128,10 +128,10 @@ no filesystem, no network:
 - `rtn(value)` — returns `value` to the caller (called for you, around the
   `transformer(...)` result)
 
-Because `status` is interpolated verbatim into a double-quoted string literal
-in the generated script, **it must be a plain scalar containing no `"`,
-backslash or newline**. Callers are responsible for stripping those before
-submitting.
+`status` and `device` are handed to the isolate as values, not spliced into
+the script source, so any string is safe to submit — quotes, backslashes and
+newlines included. They are always seen by the lambda as data and can never be
+parsed as code.
 
 ### Response
 
@@ -144,9 +144,15 @@ submitting.
 > response, successful or not. Judge success by `output`, not by the presence
 > of `error`.
 
+### Execution limits
+
+A transformer is killed if it exceeds its wall-clock budget, so a lambda that
+never returns cannot pin a worker. The default is 1000 ms, overridable with the
+`TRANSFORMER_TIMEOUT_MS` environment variable. A run that hits the limit is
+reported through the usual `error` path, leaving `output` at the previous job's
+value. The isolate itself is capped at 64 MB.
+
 ### Known limitations
 
-- `runSync` is called without a timeout, so a lambda that never returns blocks
-  its worker. Keep transformers short and terminating.
 - Results are not merged across jobs; only the final job's return value is
   reported in `output`.
