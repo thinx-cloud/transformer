@@ -25,13 +25,16 @@ FROM gcr.io/distroless/nodejs22-debian13@sha256:412a5f8fce490bcff01fc2a73ec43bb6
 
 LABEL name="thinxcloud/transformer" version="2.1.159"
 
-ARG ROLLBAR_ACCESS_TOKEN
 ARG ROLLBAR_ENVIRONMENT
 ARG REVISION
 
-ENV ROLLBAR_ACCESS_TOKEN=${ROLLBAR_ACCESS_TOKEN}
 ENV ROLLBAR_ENVIRONMENT=${ROLLBAR_ENVIRONMENT}
 ENV REVISION=${REVISION}
+
+# ROLLBAR_ACCESS_TOKEN is deliberately not declared here. This is the final
+# stage, so an ENV would be baked into the published (public)
+# thinxcloud/transformer image. It is supplied at runtime by docker-compose
+# `environment:` instead.
 
 WORKDIR /home/node/app
 
