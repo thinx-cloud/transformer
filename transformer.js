@@ -110,7 +110,13 @@ module.exports = class Transformer {
       }
     });
 
-    this.app.post("/do", function (req, res) {
+    // Arrow function, not `function` — Express invokes the handler with its
+    // own `this`, so a plain function expression left `this` undefined here and
+    // every POST /do died with
+    //   TypeError: Cannot read properties of undefined (reading 'process')
+    // before reaching process(). The arrow captures the Transformer instance
+    // lexically.
+    this.app.post("/do", (req, res) => {
       this.process(req, res);
     });
   }
