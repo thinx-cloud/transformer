@@ -1,21 +1,6 @@
 // New implementation of Transformer v2 (socket-based)
 // TODO/WARNING: This is a copy-paste for refactoring the THiNX Transformer from HTTP to Socket (secure; but not yet)
 
-let rollbar = null;
-
-if (typeof (process.env.ROLLBAR_TOKEN) !== "undefined") {
-  let Rollbar = require('rollbar');
-  rollbar = new Rollbar({
-    accessToken: process.env.ROLLBAR_TOKEN,
-    handleUncaughtExceptions: true,
-    handleUnhandledRejections: true
-  });
-}
-
-if (rollbar == null) {
-  console.log("Rollbar not initialized. Maybe missing ROLLBAR_TOKEN?");
-}
-
 const version = require('./package.json').version;
 const io = require('socket.io-client');
 const sha256 = require('sha256');

@@ -1,6 +1,9 @@
 // file deepcode ignore UseCsurfForExpress: API cannot use CSRF
 
-var rbconfig = process.env.ROLLBAR_ACCESS_TOKEN || null;
+const { rollbarServerToken } = require("./secrets.js");
+
+// ROLLBAR_SERVER_TOKEN, else ROLLBAR_ACCESS_TOKEN; a /run/secrets file first (D-03).
+var rbconfig = rollbarServerToken();
 let rollbar;
 if (rbconfig) {
   const Rollbar = require("rollbar");
@@ -12,6 +15,8 @@ if (rbconfig) {
     handleUnhandledRejections: true,
     revision: process.env.REVISION || "transformer"
   });
+} else {
+  console.log(`${new Date().getTime()} [info] ROLLBAR_SERVER_TOKEN not set — Rollbar reporting disabled`);
 }
 
 var express = require('express');

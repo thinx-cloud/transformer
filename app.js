@@ -1,3 +1,5 @@
+const { rollbarServerToken } = require("./secrets.js");
+
 let r = null; // Rollbar
 
 function exists(x) {
@@ -8,13 +10,17 @@ function undef(x) {
     return !exists(x);
 }
 
-if (exists(process.env.ROLLBAR_ACCESS_TOKEN)) {
+// ROLLBAR_SERVER_TOKEN, else ROLLBAR_ACCESS_TOKEN; a /run/secrets file first (D-03).
+const rollbar_token = rollbarServerToken();
+if (rollbar_token) {
     var Rollbar = require('rollbar');
     r = new Rollbar({
-        accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+        accessToken: rollbar_token,
         handleUncaughtExceptions: true,
         handleUnhandledRejections: true
     });
+} else {
+    console.log(`${new Date().getTime()} [info] ROLLBAR_SERVER_TOKEN not set — Rollbar reporting disabled`);
 }
 
 let Transformer = require("./trans.js");
