@@ -1,3 +1,4 @@
+/* jshint esversion: 8 */
 // Quick 261004-seq: POST /do answers honestly and never logs what it transforms.
 //
 // isolated-vm is replaced by a controllable fake (the real module needs
@@ -131,13 +132,15 @@ afterAll((done) => {
   server.close(done);
 });
 
+// the same rendering console.log uses, deep enough to reach request headers
+function capture(...args) {
+  logged.push(args.map((a) => (typeof a === 'string') ? a : util.inspect(a, { depth: 6 })).join(' '));
+}
+
 beforeEach(() => {
   logged = [];
   for (const level of ['log', 'info', 'warn', 'error', 'debug']) {
-    spies.push(jest.spyOn(console, level).mockImplementation((...args) => {
-      // the same rendering console.log uses, deep enough to reach request headers
-      logged.push(args.map((a) => (typeof a === 'string') ? a : util.inspect(a, { depth: 6 })).join(' '));
-    }));
+    spies.push(jest.spyOn(console, level).mockImplementation(capture));
   }
   mockSandbox.sources.length = 0;
   mockSandbox.runOptions.length = 0;

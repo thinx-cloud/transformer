@@ -92,17 +92,21 @@ rejected before any code runs:
 | `jobs` | `{"success": false, "error": "missing: body.jobs"}` |
 | `device` | `{"success": false, "error": "missing: device"}` |
 
+`jobs` must be a non-empty array of objects, each with a non-empty string
+`code` and a `params` object; anything else answers
+`{"success": false, "error": "invalid_jobs"}`. A body that is not valid JSON
+answers HTTP 400 `{"success": false, "error": "bad_request"}`.
+
 Note that top-level `device` is only checked for presence. The object actually
 handed to the lambda is `jobs[i].params.device`, so both must be supplied even
 though they usually carry the same value.
 
 ### Per-job fields
 
-- **`code`** — base64-encoded JavaScript defining a function named
+- **`code`** — JavaScript (base64-encoded or bare) defining a function named
   `transformer`. It is decoded, then screened twice before compiling:
-  it must contain the substring `transformer` (otherwise
-  `lambda function missing`) and must not contain `child_process`
-  (otherwise `child process not allowed`).
+  it must contain the substring `transformer` (otherwise `lambda_missing`)
+  and must not contain `child_process` (otherwise `code_rejected`).
 - **`params.status`** — the value passed as the lambda's first argument.
   Only `jobs[0].params.status` seeds the run; each subsequent job receives the
   previous job's return value, so a multi-job request is a chain, not a
@@ -124,7 +128,8 @@ rtn(transformer("<params.status>", <params.device as JSON>));
 Two globals are injected into the isolate, and nothing else — no `require`,
 no filesystem, no network:
 
-- `log(...)` — writes to the service's stdout
+- `log(...)` — accepted and discarded. Its arguments are not written anywhere
+  (they are usually device data); the service only counts the calls.
 - `rtn(value)` — returns `value` to the caller (called for you, around the
   `transformer(...)` result)
 
@@ -135,22 +140,52 @@ parsed as code.
 
 ### Response
 
+Success — every job returned a string, a finite number or a boolean (numbers
+and booleans are sent as strings):
+
 ```json
-{ "output": "<value returned by the last transformer>", "error": "transformer_error" }
+{ "output": "<value returned by the last transformer>" }
 ```
 
-> **`error` is not a failure signal.** Outside `ENVIRONMENT=test` the field is
-> currently populated with the literal string `transformer_error` on every
-> response, successful or not. Judge success by `output`, not by the presence
-> of `error`.
+Failure — no `output` at all, so a failed run can never be mistaken for a
+transform of the input status:
+
+```json
+{ "success": false, "error": "<reason code>" }
+```
+
+| reason | meaning |
+|---|---|
+| `sandbox_timeout` | a lambda exceeded the wall-clock budget |
+| `sandbox_memory` | the isolate hit its memory limit |
+| `sandbox_error` | the code did not compile, or the lambda threw |
+| `output_invalid` | a lambda returned something other than a string, finite number or boolean |
+| `lambda_missing` | the code does not mention `transformer` |
+| `code_rejected` | the code mentions `child_process` |
+| `code_invalid` | the code could not be decoded |
+| `invalid_jobs` | `jobs` is empty or malformed |
+
+Any failure ends the chain; output from earlier jobs is not reported. Job
+failures answer HTTP 200, like successes; judge them by `success: false`.
+
+Until 2.2.0 the service answered `{"output": ..., "error": "transformer_error"}`
+on every request, and a timed-out run answered the input status as `output`.
+
+### Logging
+
+The service logs startup and worker lifecycle lines and one line per request:
+a random request id, the job count, the duration and how many `log()` calls
+were suppressed, or the reason code and failing job index. It never logs the
+code, a status (input or output), the device object, the owner, the request
+object or exception text.
 
 ### Execution limits
 
 A transformer is killed if it exceeds its wall-clock budget, so a lambda that
 never returns cannot pin a worker. The default is 1000 ms, overridable with the
-`TRANSFORMER_TIMEOUT_MS` environment variable. A run that hits the limit is
-reported through the usual `error` path, leaving `output` at the previous job's
-value. The isolate itself is capped at 64 MB.
+`TRANSFORMER_TIMEOUT_MS` environment variable. A run that hits the limit answers
+`{"success": false, "error": "sandbox_timeout"}`. The isolate itself is capped
+at 64 MB.
 
 ### Known limitations
 
