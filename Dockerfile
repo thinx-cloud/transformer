@@ -1,6 +1,6 @@
 FROM node:22.23.2-trixie-slim AS build
 
-LABEL name="thinxcloud/transformer" version="2.2.0"
+LABEL name="thinxcloud/transformer" version="2.2.1"
 
 WORKDIR /home/node/app
 
@@ -23,7 +23,7 @@ RUN groupadd --gid 10001 thinx && \
 #   nodejs 22.23.2, libc6 2.41-12+deb13u4, libssl3t64 3.5.7-1~deb13u2
 FROM gcr.io/distroless/nodejs22-debian13@sha256:412a5f8fce490bcff01fc2a73ec43bb62071e1b71dd847eeacaae7b8ecef1dc1
 
-LABEL name="thinxcloud/transformer" version="2.2.0"
+LABEL name="thinxcloud/transformer" version="2.2.1"
 
 ARG ROLLBAR_ENVIRONMENT
 ARG REVISION

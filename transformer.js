@@ -33,9 +33,21 @@ const crypto = require('crypto');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length; // default number of forks
 
-// Create a new isolate limited to 128MB
+// One isolate per worker, limited to 64MB. isolated-vm disposes an isolate
+// when a lambda exceeds its memory limit, and a disposed isolate refuses every
+// later context ("Isolated is disposed"), so the worker would answer
+// sandbox_error until restarted. sandboxIsolate() replaces it instead.
 const ivm = require('isolated-vm');
-const isolate = new ivm.Isolate({ memoryLimit: 64 });
+const SANDBOX_MEMORY_MB = 64;
+let isolate = new ivm.Isolate({ memoryLimit: SANDBOX_MEMORY_MB });
+
+function sandboxIsolate() {
+  if (isolate.isDisposed) {
+    isolate = new ivm.Isolate({ memoryLimit: SANDBOX_MEMORY_MB });
+    console.log(`[transformer] sandbox isolate recreated after disposal`);
+  }
+  return isolate;
+}
 
 // Wall-clock budget for a single transformer. Without a limit, `runSync` runs
 // until the lambda returns, so `while(true){}` pins a worker forever and the
@@ -189,7 +201,8 @@ module.exports = class Transformer {
 
   execInSandbox(status, device, code_string, callback, on_log) {
 
-    const context = isolate.createContextSync();
+    const sandbox = sandboxIsolate();
+    const context = sandbox.createContextSync();
     const jail = context.global;
     jail.setSync('global', jail.derefInto());
 
@@ -215,7 +228,7 @@ module.exports = class Transformer {
     jail.setSync('__thinx_device_json', JSON.stringify(device === undefined ? null : device));
 
     // Run the untrusted code inside isolate instead of performing unsafe `eval`
-    const untrusted = isolate.compileScriptSync(`
+    const untrusted = sandbox.compileScriptSync(`
           ${code_string}; // MUST include a lambda function named 'transformer'
           rtn(transformer(__thinx_status, JSON.parse(__thinx_device_json))); // runs the code and returns value through rtn and callback
         `);
