@@ -55,7 +55,7 @@ const Transformer = require('./transformer.js');
 // Every value below must never reach a log line.
 const SECRET_STATUS = 'Battery 3.71V SECRETSTATUS';
 const SECRET_OWNER = 'ownerSECRET0123456789abcdef';
-const SECRET_UDID = 'd6ff2bb0-SECRET-udid';
+const SECRET_UDID = 'udid-marker-SECRETUDID'; // ggignore: planted log-leak marker, not a credential
 const SECRET_CODE = 'function transformer(status, device) { return status + " SECRETCODE"; }';
 const SECRET_LOG_ARG = 'SECRETLOGARG';
 const SECRET_ERROR = 'SECRETERRORMESSAGE';
