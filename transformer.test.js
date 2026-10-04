@@ -9,6 +9,7 @@
 
 const mockSandbox = {
   isolates: [],
+  instances: [],
   sources: [],
   runOptions: [],
   globals: [],
@@ -20,8 +21,12 @@ jest.mock('isolated-vm', () => {
   class Isolate {
     constructor(options) {
       mockSandbox.isolates.push(options);
+      mockSandbox.instances.push(this);
+      this.isDisposed = false;
     }
     createContextSync() {
+      // the real message, typo included (isolated-vm 6.2.0)
+      if (this.isDisposed) throw new Error('Isolated is disposed');
       const globals = {};
       mockSandbox.globals.push(globals);
       return {
@@ -220,6 +225,23 @@ describe('POST /do response contract', () => {
     expect(r.json).toEqual({ success: false, error: 'sandbox_memory' });
   });
 
+  test('after a memory-limit disposal the next request runs in a fresh isolate', async () => {
+    mockSandbox.transform = () => {
+      // isolated-vm disposes the isolate when a lambda exceeds memoryLimit
+      mockSandbox.instances[mockSandbox.instances.length - 1].isDisposed = true;
+      throw new Error('Isolate was disposed during execution due to memory limit');
+    };
+    const first = await post(body([job(SECRET_CODE, SECRET_STATUS)]));
+    expect(first.json).toEqual({ success: false, error: 'sandbox_memory' });
+
+    mockSandbox.transform = (status) => status + ' ok';
+    const second = await post(body([job(SECRET_CODE, 'next')]));
+    expect(second.json).toEqual({ output: 'next ok' });
+    expect(mockSandbox.isolates[mockSandbox.isolates.length - 1]).toEqual({ memoryLimit: 64 });
+    expect(logged.join('\n')).toMatch(/\[transformer\] sandbox isolate recreated after disposal/);
+    expectNoSecretsLogged();
+  });
+
   test('a failure in a later job answers the failure, not the partial chain', async () => {
     let n = 0;
     mockSandbox.transform = (status) => {
@@ -319,7 +341,8 @@ describe('sandbox properties are unchanged', () => {
     mockSandbox.transform = (status) => status;
     const r = await post(body([job(SECRET_CODE, 'quote" \\ backslash')]));
     expect(r.json).toEqual({ output: 'quote" \\ backslash' });
-    expect(mockSandbox.isolates).toEqual([{ memoryLimit: 64 }]);
+    expect(mockSandbox.isolates.length).toBeGreaterThan(0);
+    for (const options of mockSandbox.isolates) expect(options).toEqual({ memoryLimit: 64 });
     expect(mockSandbox.runOptions).toEqual([{ timeout: 1000 }]);
     expect(mockSandbox.released).toBe(1);
     expect(Object.keys(mockSandbox.globals[0]).sort())
