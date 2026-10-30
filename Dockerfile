@@ -1,4 +1,4 @@
-FROM node:22.23.2-trixie-slim AS build
+FROM node:22.23.4-trixie-slim AS build
 
 LABEL name="thinxcloud/transformer" version="2.2.1"
 
@@ -20,8 +20,8 @@ RUN groupadd --gid 10001 thinx && \
     chown -R transformer:thinx /home/node/app
 
 # Pinned by digest to guarantee the patched runtime contents:
-#   nodejs 22.23.2, libc6 2.41-12+deb13u4, libssl3t64 3.5.7-1~deb13u2
-FROM gcr.io/distroless/nodejs22-debian13@sha256:412a5f8fce490bcff01fc2a73ec43bb62071e1b71dd847eeacaae7b8ecef1dc1
+#   nodejs 22.23.4 (CVE-2026-111497, Brotli decoder RCE), libc6 2.41-12+deb13u4, libssl3t64 3.5.7-1~deb13u3
+FROM gcr.io/distroless/nodejs22-debian13@sha256:f643bc05bdcf5a8d98442e8a2a5c7a3a4c3a0e3bc4cdc5f10557d47f1ddd5812
 
 LABEL name="thinxcloud/transformer" version="2.2.1"
 
